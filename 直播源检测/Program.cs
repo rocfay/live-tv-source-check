@@ -33,42 +33,54 @@ namespace 直播源检测
                 if (item.Contains("http://") || item.Contains("https://"))
                 {
                     string[] temp = item.Split(',');
-                    string url = temp[1];
-                    if (!TV_Check(url))
+                    if (temp.Length==1)
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"检测第{i}个,共{count}个，状态：失效直播源，有效源{list.Count}个");
-                        Console.ResetColor();
-                        for (int n = 0; n < checkunm; n++)
+                        continue;
+                    }
+                    string[] urls = temp[1].Split('#');
+                    foreach (var url in urls)
+                    {
+                        if (!url.Contains(".m3u8"))
                         {
-                            Console.ForegroundColor = ConsoleColor.DarkBlue;
-                            Console.WriteLine($"================第{n + 1}次重测无效================");
-                            if (TV_Check(url))
+                            continue;
+                        }
+                        if (!TV_Check(url))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"检测第{i}个,共{count}个，状态：失效直播源，有效源{list.Count}个");
+                            Console.ResetColor();
+                            for (int n = 0; n < checkunm; n++)
                             {
-                                Console.ResetColor();
-                                Console.WriteLine($"重测第{i}个,共{count}个，状态：有效直播源，有效源{list.Count}个");
                                 Console.ForegroundColor = ConsoleColor.DarkBlue;
                                 Console.WriteLine($"================第{n + 1}次重测无效================");
-                                Console.ResetColor();
-                                break;
+                                if (TV_Check(url))
+                                {
+                                    Console.ResetColor();
+                                    Console.WriteLine($"重测第{i}个,共{count}个，状态：有效直播源，有效源{list.Count}个");
+                                    Console.ForegroundColor = ConsoleColor.DarkBlue;
+                                    Console.WriteLine($"================第{n + 1}次重测无效================");
+                                    Console.ResetColor();
+                                    break;
+                                }
+                                if (n == checkunm - 1)
+                                {
+                                    list.Remove(item);
+                                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                                    Console.WriteLine($"重测第{i}个,共{count}个，状态：失效直播源，有效源{list.Count}个");
+                                    errlist.Add(item);
+                                    Console.ForegroundColor = ConsoleColor.DarkBlue;
+                                    Console.WriteLine($"================第{n + 1}次重测无效================");
+                                    Console.ResetColor();
+                                }
+
                             }
-                            if (n == checkunm-1)
-                            {
-                                list.Remove(item);
-                                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                                Console.WriteLine($"重测第{i}个,共{count}个，状态：失效直播源，有效源{list.Count}个");
-                                errlist.Add(item);
-                                Console.ForegroundColor = ConsoleColor.DarkBlue;
-                                Console.WriteLine($"================第{n + 1}次重测无效================");
-                                Console.ResetColor();
-                            }
-                            
-                        }   
+                        }
+                        else
+                        {
+                            Console.WriteLine($"检测第{i}个,共{count}个，状态：有效直播源，有效源{list.Count}个");
+                        }
                     }
-                    else
-                    {
-                        Console.WriteLine($"检测第{i}个,共{count}个，状态：有效直播源，有效源{list.Count}个");
-                    }
+                    
                 }
                 
             }
@@ -84,6 +96,10 @@ namespace 直播源检测
             foreach (string item in list.ToArray())
             {
                 string[] temp = item.Split(',');
+                if (temp.Length == 1)
+                {
+                    continue;
+                }
                 if (tvdic.Count == 0)
                 {
                     tvdic.Add(temp[0], temp[1]);
@@ -124,8 +140,9 @@ namespace 直播源检测
             {
                 list1.Add(item.Key + item.Value);
             }
-            File.WriteAllLines(System.Environment.CurrentDirectory + "\\ok_tv.txt", list1.ToArray());
-            File.WriteAllLines(System.Environment.CurrentDirectory + "\\err_tv.txt", errlist.ToArray());
+            string time = DateTime.Now.Ticks.ToString();
+            File.WriteAllLines(System.Environment.CurrentDirectory + $"\\ok_tv{time}.txt", list1.ToArray());
+            File.WriteAllLines(System.Environment.CurrentDirectory + $"\\err_tv{time}.txt", errlist.ToArray());
 
          }
         static void TV_CheckC(List<string> list2, ref List<string> errlist)
