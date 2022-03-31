@@ -21,6 +21,8 @@ namespace 直播源检测
         private static int checkunm = 1;//无效重测次数
         static void Main(string[] args)
         {
+            
+            
             list = File.ReadAllLines(System.Environment.CurrentDirectory + "\\tv.txt").ToList();
             //int enumnum = typeof(ConsoleColor).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Length;
             
@@ -113,6 +115,10 @@ namespace 直播源检测
                         {
                             if (item1.Key.Equals(temp[0]))
                             {
+                                if (tvdic[temp[0]].Contains(temp[1]))
+                                {
+                                    continue;
+                                }
                                 tvdic[temp[0]] = tvdic[temp[0]] + "#" + temp[1];
                                 break;
                             }
@@ -125,6 +131,10 @@ namespace 直播源检测
                         }
                         else
                         {
+                            if (tvdic[temp[0]].Contains(temp[1]))
+                            {
+                                continue;
+                            }
                             tvdic[temp[0]] = tvdic[temp[0]] + "#" + temp[1];
                             break;
                         }
@@ -138,9 +148,10 @@ namespace 直播源检测
             List<string> list1 = new List<string>();
             foreach (KeyValuePair<string, string> item in tvdic)
             {
-                list1.Add(item.Key + item.Value);
+                list1.Add(item.Key + "," + item.Value);
             }
-            string time = DateTime.Now.Ticks.ToString();
+            //string time = DateTime.Now.Ticks.ToString();
+            string time = DateTime.Now.ToString("yyMMddHHmmss");
             File.WriteAllLines(System.Environment.CurrentDirectory + $"\\ok_tv{time}.txt", list1.ToArray());
             File.WriteAllLines(System.Environment.CurrentDirectory + $"\\err_tv{time}.txt", errlist.ToArray());
 
