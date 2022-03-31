@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -22,7 +23,7 @@ namespace 直播源检测
         static void Main(string[] args)
         {
             
-            
+            //TV_Check("http://dllb.jxin122.top/jj.php?id=19&p=0&c=3&key=ced06b227baa54c961d63cc2c09dbc52");
             list = File.ReadAllLines(System.Environment.CurrentDirectory + "\\tv.txt").ToList();
             //int enumnum = typeof(ConsoleColor).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Length;
             
@@ -42,7 +43,11 @@ namespace 直播源检测
                     string[] urls = temp[1].Split('#');
                     foreach (var url in urls)
                     {
-                        if (!url.Contains(".m3u8"))
+                        //if (!url.Contains(".m3u8"))
+                        //{
+                        //    continue;
+                        //}
+                        if (string.IsNullOrEmpty(url))
                         {
                             continue;
                         }
@@ -150,6 +155,7 @@ namespace 直播源检测
             {
                 list1.Add(item.Key + "," + item.Value);
             }
+            list1.Sort((x, y) => -x.CompareTo(y));
             //string time = DateTime.Now.Ticks.ToString();
             string time = DateTime.Now.ToString("yyMMddHHmmss");
             File.WriteAllLines(System.Environment.CurrentDirectory + $"\\ok_tv{time}.txt", list1.ToArray());
@@ -202,6 +208,10 @@ namespace 直播源检测
         }
         static bool TV_Check(string url)
         {
+            if (string.IsNullOrEmpty(url)|| !Regex.IsMatch(url, "[a-zA-z]+://[^\\s]*"))
+            {
+                return false;
+            }
             //解决https不安全提示
             //ServicePointManager.SecurityProtocol = (System.Net.SecurityProtocolType)4080; //SecurityProtocolType.Tls ; //Or SecurityProtocolType.Ssl3 Or SecurityProtocolType.Tls11 Or SecurityProtocolType.Tls;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | SecurityProtocolType.SystemDefault;
