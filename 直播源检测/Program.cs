@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -21,11 +22,35 @@ namespace 直播源检测
         private static int checkunm = 1;//无效重测次数
         static void Main(string[] args)
         {
+            Console.SetWindowSize(50, 20);
+            Console.SetBufferSize(50, 20);
+            string tvfile = string.Empty;
+            //文件拖拽入控制台
+            if (args.Length>0)
+            {
+                FileInfo fileInfo = new FileInfo(args[0]);
+                // Console.WriteLine(fileInfo.FullName);
+                //Console.ReadLine();
+                tvfile = fileInfo.FullName;
+            }
+            if (string.IsNullOrEmpty(tvfile))
+            {
+                Console.Write("请拖入txt文本后并回车确认输入");
+                tvfile = Console.ReadLine();
+            }
+            if (string.IsNullOrEmpty(tvfile))
+            {
+                return;
+            }
             
-            
-            list = File.ReadAllLines(System.Environment.CurrentDirectory + "\\tv.txt").ToList();
+            string time1 = DateTime.Now.ToString("yyMMddHHmmss");
+            string tempfilename = tvfile.Substring(0, tvfile.LastIndexOf("\\") + 1) + $"边测边保存_{time1}.txt";
+
+            //TV_Check("http://dllb.jxin122.top/jj.php?id=19&p=0&c=3&key=ced06b227baa54c961d63cc2c09dbc52");
+            //list = File.ReadAllLines(System.Environment.CurrentDirectory + "\\tv.txt").ToList();
+            list = File.ReadAllLines(tvfile).ToList();
             //int enumnum = typeof(ConsoleColor).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Length;
-            
+
 
             int i = 0;
             int count = list.Count;
@@ -42,7 +67,11 @@ namespace 直播源检测
                     string[] urls = temp[1].Split('#');
                     foreach (var url in urls)
                     {
-                        if (!url.Contains(".m3u8"))
+                        //if (!url.Contains(".m3u8"))
+                        //{
+                        //    continue;
+                        //}
+                        if (string.IsNullOrEmpty(url))
                         {
                             continue;
                         }
@@ -57,6 +86,15 @@ namespace 直播源检测
                                 Console.WriteLine($"================第{n + 1}次重测无效================");
                                 if (TV_Check(url))
                                 {
+                                    //边测试边保存
+                                    using (FileStream fs = new FileStream(tempfilename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                                    {
+                                        fs.Seek(0, SeekOrigin.End);
+                                        using (StreamWriter sw = new StreamWriter(fs))
+                                        {
+                                            sw.WriteLine(item);
+                                        }
+                                    }
                                     Console.ResetColor();
                                     Console.WriteLine($"重测第{i}个,共{count}个，状态：有效直播源，有效源{list.Count}个");
                                     Console.ForegroundColor = ConsoleColor.DarkBlue;
@@ -79,6 +117,15 @@ namespace 直播源检测
                         }
                         else
                         {
+                            //边测试边保存
+                            using (FileStream fs = new FileStream(tempfilename, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                            {
+                                fs.Seek(0, SeekOrigin.End);
+                                using (StreamWriter sw = new StreamWriter(fs))
+                                {
+                                    sw.WriteLine(item);
+                                }
+                            }
                             Console.WriteLine($"检测第{i}个,共{count}个，状态：有效直播源，有效源{list.Count}个");
                         }
                     }
@@ -150,6 +197,7 @@ namespace 直播源检测
             {
                 list1.Add(item.Key + "," + item.Value);
             }
+            list1.Sort((x, y) => -x.CompareTo(y));
             //string time = DateTime.Now.Ticks.ToString();
             string time = DateTime.Now.ToString("yyMMddHHmmss");
             File.WriteAllLines(System.Environment.CurrentDirectory + $"\\ok_tv{time}.txt", list1.ToArray());
@@ -202,6 +250,10 @@ namespace 直播源检测
         }
         static bool TV_Check(string url)
         {
+            if (string.IsNullOrEmpty(url)|| !Regex.IsMatch(url, "[a-zA-z]+://[^\\s]*"))
+            {
+                return false;
+            }
             //解决https不安全提示
             //ServicePointManager.SecurityProtocol = (System.Net.SecurityProtocolType)4080; //SecurityProtocolType.Tls ; //Or SecurityProtocolType.Ssl3 Or SecurityProtocolType.Tls11 Or SecurityProtocolType.Tls;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls | SecurityProtocolType.Ssl3 | SecurityProtocolType.SystemDefault;
