@@ -37,7 +37,7 @@ namespace 直播源检测
             {
                 Console.Write("请拖入txt文本后并回车确认输入");
                 tvfile = Console.ReadLine().Replace("\"","");
-                Console.WriteLine(tvfile);
+                //Console.WriteLine(tvfile);
             }
             if (string.IsNullOrEmpty(tvfile))
             {
