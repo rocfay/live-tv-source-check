@@ -36,15 +36,17 @@ namespace 直播源检测
             if (string.IsNullOrEmpty(tvfile))
             {
                 Console.Write("请拖入txt文本后并回车确认输入");
-                tvfile = Console.ReadLine();
+                tvfile = Console.ReadLine().Replace("\"","");
+                Console.WriteLine(tvfile);
             }
             if (string.IsNullOrEmpty(tvfile))
             {
                 return;
             }
             
-            
-            list = File.ReadAllLines(System.Environment.CurrentDirectory + "\\tv.txt").ToList();
+            string time1= DateTime.Now.ToString("yyMMddHHmmss");
+            string tempfilename = tvfile.Substring(0, tvfile.LastIndexOf("\\") + 1) + "边测边保存.txt";
+            list = File.ReadAllLines(tvfile).ToList();
             //int enumnum = typeof(ConsoleColor).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Length;
 
 
