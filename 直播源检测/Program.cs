@@ -43,12 +43,8 @@ namespace 直播源检测
                 return;
             }
             
-            string time1 = DateTime.Now.ToString("yyMMddHHmmss");
-            string tempfilename = tvfile.Substring(0, tvfile.LastIndexOf("\\") + 1) + $"边测边保存_{time1}.txt";
-
-            //TV_Check("http://dllb.jxin122.top/jj.php?id=19&p=0&c=3&key=ced06b227baa54c961d63cc2c09dbc52");
-            //list = File.ReadAllLines(System.Environment.CurrentDirectory + "\\tv.txt").ToList();
-            list = File.ReadAllLines(tvfile).ToList();
+            
+            list = File.ReadAllLines(System.Environment.CurrentDirectory + "\\tv.txt").ToList();
             //int enumnum = typeof(ConsoleColor).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Length;
 
 
